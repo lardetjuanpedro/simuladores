@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLC Sim - Entorno de Automatización</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <h2>Componentes</h2>
+            <div class="component-group">
+                <div class="draggable" draggable="true" data-type="NO">Contacto NA</div>
+                <div class="draggable" draggable="true" data-type="NC">Contacto NC</div>
+                <div class="draggable" draggable="true" data-type="TON">Timer ON</div>
+                <div class="draggable" draggable="true" data-type="TOF">Timer OFF</div>
+                <div class="draggable" draggable="true" data-type="SR">Flip-Flop SR</div>
+                <div class="draggable" draggable="true" data-type="RESET_COIL">Bobina Reset (R)</div>
+                <div class="draggable" draggable="true" data-type="COIL">Bobina</div>
+            </div>
+
+            <h2>Herramientas</h2>
+            <div class="tool-group">
+                <button id="btn-select">Seleccionar</button>
+                <button id="btn-delete">Borrar</button>
+                <button id="btn-copy">Copiar/Pegar</button>
+                <button id="btn-exp">Exportar Proyecto</button>
+
+                <button onclick="document.getElementById('file-input').click()">Importar Proyecto</button>
+                <input type="file" id="file-input" style="display: none;" accept=".json"
+                    onchange="importarProyecto(event)">
+                <button id="btn-new-rung" onclick="createRung()" class="primary">Nuevo Rung (+)</button>
+            </div>
+
+            <div id="side-monitor" class="monitor-container">
+    <button id="toggle-monitor" onclick="toggleMonitor()">☰ Monitor de Variables</button>
+    <div id="variable-monitor" class="monitor-content">
+        </div>
+</div>
+
+
+
+            <div class="simulation-controls">
+                <button id="run-btn" class="primary">RUN</button>
+                <button id="stop-btn">STOP</button>
+                <button id="reset-btn">RESET</button>
+            </div>
+        </aside>
+
+        <main class="editor-area">
+            <div class="editor-header">Diagrama de Contactos (Ladder)</div>
+            <div id="ladder-canvas" class="canvas">
+                <div class="rung-placeholder">Arrastra un componente aquí para iniciar...</div>
+            </div>
+        </main>
+
+        <section class="visualizer-area">
+            <div class="editor-header">Simulación Brazo Robótico</div>
+            <div id="threejs-container">
+                <div class="placeholder-3d">Cargando Entorno 3D...</div>
+            </div>
+            <div class="io-info">
+                <p>Ejes activos: 4</p>
+                <p>Estado: Ready</p>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="animacion.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,312 @@
+:root {
+    --bg-dark: #2c3e50;
+    --bg-light: #ecf0f1;
+    --accent: #3498db;
+    --danger: #e74c3c;
+    --success: #27ae60;
+    --border-color: #bdc3c7;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+}
+
+.app-container {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background-color: var(--bg-light);
+    border-right: 2px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+h2 { font-size: 0.9rem; color: var(--bg-dark); margin-top: 15px; border-bottom: 1px solid #ccc; }
+
+.draggable {
+    background: white;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid var(--border-color);
+    cursor: grab;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.draggable:active { cursor: grabbing; background: #d0e4f2; }
+
+/* Editor Central */
+.editor-area {
+    flex-grow: 1;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-header {
+    background: var(--bg-dark);
+    color: white;
+    padding: 8px 15px;
+    font-size: 0.9rem;
+}
+
+.canvas {
+    flex-grow: 1;
+    background-image: 
+        linear-gradient(to right, #f0f0f0 1px, transparent 1px),
+        linear-gradient(to bottom, #f0f0f0 1px, transparent 1px);
+    background-size: 20px 20px;
+    position: relative;
+    padding: 20px;
+}
+
+/* Panel 3D */
+.visualizer-area {
+    width: 350px;
+    background-color: #f8f9fa;
+    border-left: 2px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+#threejs-container {
+    flex-grow: 1;
+    background: #000;
+    margin: 10px;
+    border-radius: 4px;
+}
+
+/* Controles */
+button {
+    margin: 2px;
+    padding: 8px;
+    cursor: pointer;
+    border: 1px solid #999;
+}
+
+.simulation-controls {
+    margin-top: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+}
+
+.primary { background-color: var(--success); color: white; border: none; }
+
+/* script.js - Estilos de los Rungs y Componentes */
+.rung {
+    display: flex;
+    align-items: center;
+    height: 100px;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.rail-left, .rail-right {
+    width: 10px;
+    height: 100%;
+    background-color: #555;
+}
+
+.rung-content {
+    flex-grow: 1;
+    height: 2px;
+    background-color: #555;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 30px; /* Espacio entre componentes */
+}
+
+.ladder-item {
+    background: white;
+    border: 2px solid var(--bg-dark);
+    min-width: 60px;
+    height: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+.ladder-item .symbol {
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.var-label {
+    width: 80%;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    font-size: 0.7rem;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+/* Colores para estados activos (Fase 3 preview) */
+.ladder-item.active {
+    border-color: var(--success);
+    box-shadow: 0 0 10px var(--success);
+}
+
+/* Fase 3: Feedback Visual */
+.ladder-item.active {
+    border-color: #f1c40f !important; /* Dorado/Amarillo eléctrico */
+    box-shadow: 0 0 15px #f1c40f;
+    background-color: #fff9e6;
+}
+
+.ladder-item.active .symbol {
+    color: #f39c12;
+}
+
+.var-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+    font-size: 0.8rem;
+}
+
+.var-item input {
+    cursor: pointer;
+}
+
+#threejs-container {
+    width: 100%;
+    height: 300px; /* Ajusta según prefieras */
+    background: #000;
+}
+canvas {
+    display: block; /* Quita márgenes internos */
+}
+
+/* Feedback de botones de herramientas */
+.tool-group button:active {
+    background-color: var(--accent);
+    color: white;
+}
+
+.monitor {
+    max-height: 200px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 5px;
+}
+
+/* Estilo para los bloques especiales */
+.ladder-item.TON, .ladder-item.SR {
+    background-color: #f3f4f6;
+    min-width: 80px;
+    border-style: double;
+}
+
+.rung-content {
+    flex-grow: 1;
+    height: 100%; /* Asegura que ocupe el alto del renglón */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Alinea a la izquierda */
+    padding: 0 10px;
+    gap: 0; /* Quitamos el gap para controlar la línea manualmente */
+    background-image: linear-gradient(to bottom, transparent 49%, #555 49%, #555 51%, transparent 51%);
+    background-size: 100% 100%; /* Línea horizontal continua */
+}
+
+.ladder-item {
+    background: white;
+    margin: 0 15px; /* El espacio lo damos con márgenes */
+    /* ... resto del código igual ... */
+}
+
+.time-val {
+    width: 40px;
+    font-size: 0.7rem;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    margin-bottom: 3px;
+    background: #fdfdfd;
+}
+
+/* Ocultar flechas del input number para que sea más estético */
+.time-val::-webkit-inner-spin-button, 
+.time-val::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+}
+
+.rung {
+    transition: background 0.3s;
+    cursor: pointer;
+}
+.rung:hover {
+    background-color: #f9f9f9;
+}
+
+.ladder-item.SR .symbol { color: var(--success); font-weight: bold; }
+.ladder-item.RESET_COIL .symbol { color: var(--danger); font-weight: bold; }
+
+.monitor-container {
+    position: fixed;
+    bottom: 20px;
+    left: 20px; /* Movido a la izquierda */
+    width: 280px; /* Un poco más ancho para legibilidad */
+    max-height: 70vh;
+    background: #ffffff;
+    border: 1px solid #bdc3c7;
+    border-radius: 8px;
+    box-shadow: 2px 2px 15px rgba(0,0,0,0.15); /* Sombra invertida */
+    z-index: 1100; 
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Estado contraído (hacia abajo) */
+.monitor-container.collapsed {
+    transform: translateY(calc(100% - 45px));
+}
+
+#toggle-monitor {
+    width: 100%;
+    padding: 12px;
+    background: #2c3e50;
+    color: #ecf0f1;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    font-weight: bold;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+}
+
+.monitor-content {
+    padding: 15px;
+    overflow-y: auto;
+    background: #fdfdfd;
+}
+
+/* Estilo para los items del monitor */
+.var-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}

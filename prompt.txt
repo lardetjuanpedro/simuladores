@@ -1,0 +1,14 @@
+Vamos a crear un entorno de desarrollo y simulación interactivo con fines didácticos de automatización industrial con ladder. Dicho entorno, debe estar compuesto por 3 partes: 
+- una barra lateral donde se encuentran las opciones tipo drag and drop de normal abierto, normal cerrado, timer on, timer off, flip flop sr, bobina. seguido por botones para la interacción como borrar, seleccionar, mover, copiar, pegar. seguido por un monitor de forzado y visualización de las variables de la simulación. seguido por los botones de inicio de simulación, parada, reseteo, exportación del proyecto, importación de un proyecto.
+- una interfaz media donde se encuentre la posibilidad de escribir ladder, a partir de los drag and drops mencionados antes. de manera de crear el programa ladder. aquí se debe poder observar de manera similar a logo soft comfort, tia portal o cade simu, los simbolos de los elementos mencionados anteriormente. las interacciones entre los elementos deben ser las correctas.
+es necesario que se checkee los estados prohibidos antes de iniciar la simulación, al precionar el botón de inicio de simulación, y que se indique la presencia de errores.
+- y finalmente, la parte mas ambiciosa, una representación 3d de un robot tipo brazo, con animación del mismo, cuando determinados actuadores y/o sensores sean implementados en la logica programada anterior. su info debe estar mapeada en el monitor de variables para que el usuario sepa como se llaman. por ejemplo, MOTOR_A_F de forward, MOTOR_A_B de backwards. controlado por pares de actuadores y fines de carrera configurables.
+La idea es poder controlar 4 pares de actuadores y fines de carrera. para 4 ejes de libertad del robot.
+
+para implementarlo, te propongo el desarrollo progresivo en fases a determinar por vos, de un programa en html, css y js compuesto por lo siguientes archivos.
+index.html
+script.js
+styles.css
+animacion.js
+
+comienza por determinar las fases de desarrollo convenientes y progresivas.
