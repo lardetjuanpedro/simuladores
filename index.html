@@ -5,7 +5,320 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PLC Sim - Entorno de Automatización</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+:root {
+    --bg-dark: #2c3e50;
+    --bg-light: #ecf0f1;
+    --accent: #3498db;
+    --danger: #e74c3c;
+    --success: #27ae60;
+    --border-color: #bdc3c7;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+}
+
+.app-container {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background-color: var(--bg-light);
+    border-right: 2px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+h2 { font-size: 0.9rem; color: var(--bg-dark); margin-top: 15px; border-bottom: 1px solid #ccc; }
+
+.draggable {
+    background: white;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid var(--border-color);
+    cursor: grab;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.draggable:active { cursor: grabbing; background: #d0e4f2; }
+
+/* Editor Central */
+.editor-area {
+    flex-grow: 1;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-header {
+    background: var(--bg-dark);
+    color: white;
+    padding: 8px 15px;
+    font-size: 0.9rem;
+}
+
+.canvas {
+    flex-grow: 1;
+    background-image: 
+        linear-gradient(to right, #f0f0f0 1px, transparent 1px),
+        linear-gradient(to bottom, #f0f0f0 1px, transparent 1px);
+    background-size: 20px 20px;
+    position: relative;
+    padding: 20px;
+}
+
+/* Panel 3D */
+.visualizer-area {
+    width: 350px;
+    background-color: #f8f9fa;
+    border-left: 2px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+#threejs-container {
+    flex-grow: 1;
+    background: #000;
+    margin: 10px;
+    border-radius: 4px;
+}
+
+/* Controles */
+button {
+    margin: 2px;
+    padding: 8px;
+    cursor: pointer;
+    border: 1px solid #999;
+}
+
+.simulation-controls {
+    margin-top: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+}
+
+.primary { background-color: var(--success); color: white; border: none; }
+
+/* script.js - Estilos de los Rungs y Componentes */
+.rung {
+    display: flex;
+    align-items: center;
+    height: 100px;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.rail-left, .rail-right {
+    width: 10px;
+    height: 100%;
+    background-color: #555;
+}
+
+.rung-content {
+    flex-grow: 1;
+    height: 2px;
+    background-color: #555;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 30px; /* Espacio entre componentes */
+}
+
+.ladder-item {
+    background: white;
+    border: 2px solid var(--bg-dark);
+    min-width: 60px;
+    height: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+.ladder-item .symbol {
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.var-label {
+    width: 80%;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    font-size: 0.7rem;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+/* Colores para estados activos (Fase 3 preview) */
+.ladder-item.active {
+    border-color: var(--success);
+    box-shadow: 0 0 10px var(--success);
+}
+
+/* Fase 3: Feedback Visual */
+.ladder-item.active {
+    border-color: #f1c40f !important; /* Dorado/Amarillo eléctrico */
+    box-shadow: 0 0 15px #f1c40f;
+    background-color: #fff9e6;
+}
+
+.ladder-item.active .symbol {
+    color: #f39c12;
+}
+
+.var-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+    font-size: 0.8rem;
+}
+
+.var-item input {
+    cursor: pointer;
+}
+
+#threejs-container {
+    width: 100%;
+    height: 300px; /* Ajusta según prefieras */
+    background: #000;
+}
+canvas {
+    display: block; /* Quita márgenes internos */
+}
+
+/* Feedback de botones de herramientas */
+.tool-group button:active {
+    background-color: var(--accent);
+    color: white;
+}
+
+.monitor {
+    max-height: 200px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 5px;
+}
+
+/* Estilo para los bloques especiales */
+.ladder-item.TON, .ladder-item.SR {
+    background-color: #f3f4f6;
+    min-width: 80px;
+    border-style: double;
+}
+
+.rung-content {
+    flex-grow: 1;
+    height: 100%; /* Asegura que ocupe el alto del renglón */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Alinea a la izquierda */
+    padding: 0 10px;
+    gap: 0; /* Quitamos el gap para controlar la línea manualmente */
+    background-image: linear-gradient(to bottom, transparent 49%, #555 49%, #555 51%, transparent 51%);
+    background-size: 100% 100%; /* Línea horizontal continua */
+}
+
+.ladder-item {
+    background: white;
+    margin: 0 15px; /* El espacio lo damos con márgenes */
+    /* ... resto del código igual ... */
+}
+
+.time-val {
+    width: 40px;
+    font-size: 0.7rem;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    margin-bottom: 3px;
+    background: #fdfdfd;
+}
+
+/* Ocultar flechas del input number para que sea más estético */
+.time-val::-webkit-inner-spin-button, 
+.time-val::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+}
+
+.rung {
+    transition: background 0.3s;
+    cursor: pointer;
+}
+.rung:hover {
+    background-color: #f9f9f9;
+}
+
+.ladder-item.SR .symbol { color: var(--success); font-weight: bold; }
+.ladder-item.RESET_COIL .symbol { color: var(--danger); font-weight: bold; }
+
+.monitor-container {
+    position: fixed;
+    bottom: 20px;
+    left: 20px; /* Movido a la izquierda */
+    width: 280px; /* Un poco más ancho para legibilidad */
+    max-height: 70vh;
+    background: #ffffff;
+    border: 1px solid #bdc3c7;
+    border-radius: 8px;
+    box-shadow: 2px 2px 15px rgba(0,0,0,0.15); /* Sombra invertida */
+    z-index: 1100; 
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Estado contraído (hacia abajo) */
+.monitor-container.collapsed {
+    transform: translateY(calc(100% - 45px));
+}
+
+#toggle-monitor {
+    width: 100%;
+    padding: 12px;
+    background: #2c3e50;
+    color: #ecf0f1;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    font-weight: bold;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+}
+
+.monitor-content {
+    padding: 15px;
+    overflow-y: auto;
+    background: #fdfdfd;
+}
+
+/* Estilo para los items del monitor */
+.var-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+</style>
 </head>
 
 <body>
@@ -70,8 +383,597 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="animacion.js"></script>
-    <script src="script.js"></script>
+    <script>
+// animacion.js - Motor 3D con Gripper (Pinza)
+let scene, camera, renderer;
+let base, arm1, arm2; 
+let fingerL, fingerR; // Variables para la pinza
+
+function init3D() {
+    const container = document.getElementById('threejs-container');
+    if (!container) return;
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.set(4, 4, 4);
+    camera.lookAt(0, 1, 0);
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.innerHTML = ''; 
+    container.appendChild(renderer.domElement);
+
+    // Luces
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(5, 10, 7);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0x404040));
+
+    // --- CONSTRUCCIÓN DEL ROBOT ---
+    // Base
+    const baseGeo = new THREE.CylinderGeometry(1, 1, 0.5, 32);
+    base = new THREE.Mesh(baseGeo, new THREE.MeshStandardMaterial({ color: 0x3498db }));
+    scene.add(base);
+
+    // Hombro (Arm 1)
+    const arm1Geo = new THREE.BoxGeometry(0.4, 2, 0.4);
+    arm1 = new THREE.Mesh(arm1Geo, new THREE.MeshStandardMaterial({ color: 0x2ecc71 }));
+    arm1.position.y = 1;
+    window.shoulder = new THREE.Group();
+    window.shoulder.position.y = 0.25;
+    window.shoulder.add(arm1);
+    base.add(window.shoulder);
+
+    // Codo (Arm 2)
+    const arm2Geo = new THREE.BoxGeometry(0.3, 1.5, 0.3);
+    arm2 = new THREE.Mesh(arm2Geo, new THREE.MeshStandardMaterial({ color: 0xe74c3c }));
+    arm2.position.y = 0.75;
+    window.elbow = new THREE.Group();
+    window.elbow.position.y = 1.8;
+    window.elbow.add(arm2);
+    window.shoulder.add(window.elbow);
+
+    // --- PINZA (GRIPPER) ---
+    const fingerGeo = new THREE.BoxGeometry(0.1, 0.4, 0.1);
+    const fingerMat = new THREE.MeshStandardMaterial({ color: 0x555555 });
+    
+    fingerL = new THREE.Mesh(fingerGeo, fingerMat);
+    fingerR = new THREE.Mesh(fingerGeo, fingerMat);
+    
+    // Posición inicial de los dedos al final del Arm 2
+    fingerL.position.set(-0.1, 1.5, 0);
+    fingerR.position.set(0.1, 1.5, 0);
+    
+    window.elbow.add(fingerL);
+    window.elbow.add(fingerR);
+
+    animate();
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    if (typeof updateRobotPhysics === 'function') {
+        updateRobotPhysics();
+    }
+    renderer.render(scene, camera);
+}
+
+function updateRobotPhysics() {
+    // GUARDIA: Evita errores si el PLC o las piezas no están listos
+    if (typeof PLC_STATE === 'undefined' || !base || !window.shoulder || !window.elbow || !fingerL) return;
+
+    // Movimiento Base (Eje 1)
+    if (PLC_STATE['M1_F'] && !PLC_STATE['FC1_F']) base.rotation.y += 0.02;
+    if (PLC_STATE['M1_B'] && !PLC_STATE['FC1_B']) base.rotation.y -= 0.02;
+
+    // Movimiento Hombro (Eje 2)
+    if (PLC_STATE['M2_F'] && !PLC_STATE['FC2_F']) window.shoulder.rotation.z += 0.02;
+    if (PLC_STATE['M2_B'] && !PLC_STATE['FC2_B']) window.shoulder.rotation.z -= 0.02;
+
+    // Movimiento Codo (Eje 3)
+    if (PLC_STATE['M3_F'] && !PLC_STATE['FC3_F']) window.elbow.rotation.z += 0.02;
+    if (PLC_STATE['M3_B'] && !PLC_STATE['FC3_B']) window.elbow.rotation.z -= 0.02;
+
+    // Movimiento Pinza (Eje 4)
+    if (PLC_STATE['M4_F']) { // Abrir
+        if (fingerL.position.x > -0.3) {
+            fingerL.position.x -= 0.01;
+            fingerR.position.x += 0.01;
+        }
+    }
+    if (PLC_STATE['M4_B']) { // Cerrar
+        if (fingerL.position.x < -0.05) {
+            fingerL.position.x += 0.01;
+            fingerR.position.x -= 0.01;
+        }
+    }
+
+    // Actualizar Fines de Carrera virtuales para la pinza
+    PLC_STATE['FC4_F'] = (fingerL.position.x <= -0.3);
+    PLC_STATE['FC4_B'] = (fingerL.position.x >= -0.05);
+}
+
+window.onload = init3D;</script>
+    <script>
+// script.js - Entorno de Simulación PLC para EPET N°14
+const canvas = document.getElementById('ladder-canvas');
+let rungCount = 0;
+let selectedRungContent = null;
+let simulationInterval = null;
+const PLC_STATE = {}; 
+let deleteMode = false;
+
+// Inicialización de variables del Robot
+const robotVariables = [
+    'M1_F', 'M1_B', 'FC1_F', 'FC1_B',
+    'M2_F', 'M2_B', 'FC2_F', 'FC2_B',
+    'M3_F', 'M3_B', 'FC3_F', 'FC3_B',
+    'M4_F', 'M4_B', 'FC4_F', 'FC4_B'
+];
+robotVariables.forEach(v => PLC_STATE[v] = false);
+
+// --- INTERFAZ Y CANVAS ---
+
+// Configuración del botón Borrar en el HTML
+document.getElementById('btn-delete').onclick = () => {
+    deleteMode = !deleteMode;
+    const btn = document.getElementById('btn-delete');
+    
+    if (deleteMode) {
+        btn.style.backgroundColor = "var(--danger)";
+        btn.style.color = "white";
+        canvas.style.cursor = "crosshair"; // Cambia el cursor para indicar peligro
+    } else {
+        btn.style.backgroundColor = "";
+        btn.style.color = "";
+        canvas.style.cursor = "default";
+    }
+};
+
+function createRung() {
+    rungCount++;
+    const rung = document.createElement('div');
+    rung.className = 'rung';
+    // Evento para seleccionar el renglón donde se soltarán los componentes
+    rung.onclick = () => selectRung(rung.querySelector('.rung-content'));
+    
+    rung.innerHTML = `
+        <div class="rail-left"></div>
+        <div class="rung-content" data-rung-id="${rungCount}"></div>
+        <div class="rail-right"></div>
+    `;
+    canvas.appendChild(rung);
+    
+    const content = rung.querySelector('.rung-content');
+    selectRung(content); 
+    return content;
+}
+
+function selectRung(contentArea) {
+    // Quitar destaque visual de otros rungs
+    document.querySelectorAll('.rung-content').forEach(r => r.parentElement.style.border = "none");
+    // Destacar el seleccionado actual
+    selectedRungContent = contentArea;
+    selectedRungContent.parentElement.style.border = "1px solid #3498db";
+}
+
+function addComponentToCanvas(type) {
+    const placeholder = canvas.querySelector('.rung-placeholder');
+    if (placeholder) placeholder.remove();
+
+    // Si no hay ninguno seleccionado, usa el último o crea uno nuevo
+    if (!selectedRungContent) {
+        let lastRung = canvas.querySelector('.rung:last-child');
+        selectedRungContent = lastRung ? lastRung.querySelector('.rung-content') : createRung();
+    }
+
+    // Regla: Si intentamos poner una bobina donde ya hay una, creamos un nuevo Rung automáticamente
+    const hasCoilInRung = selectedRungContent.querySelector('.COIL, .SR, .RESET_COIL');
+    if (hasCoilInRung && (type === 'COIL' || type === 'SR' || type === 'RESET_COIL')) {
+        createRung();
+    }
+
+    const component = document.createElement('div');
+    component.className = `ladder-item ${type}`;
+
+    let innerHTML = `<div class="symbol">${getSymbol(type)}</div>`;
+    if (type === 'TON' || type === 'TOF') {
+        innerHTML += `<input type="number" class="time-val" value="3" min="0.1" step="0.1">`;
+    }
+    innerHTML += `<input type="text" class="var-label" placeholder="TAG" 
+                   oninput="updateMonitor(this)" onblur="updateMonitor(this)">`;
+
+    component.innerHTML = innerHTML;
+
+    // Borrado con click derecho
+    component.oncontextmenu = (e) => {
+        e.preventDefault();
+        const parentRung = component.closest('.rung');
+        component.remove();
+        if (parentRung.querySelector('.rung-content').children.length === 0) {
+            parentRung.remove();
+            selectedRungContent = null;
+        }
+    };
+
+    selectedRungContent.appendChild(component);
+}
+
+function getSymbol(type) {
+    const symbols = {
+        'NO': '┤ ├',
+        'NC': '┤/├',
+        'COIL': '( )',
+        'TON': '[TON]',
+        'TOF': '[TOF]',
+        'SR': '[ S ]',         // Set
+        'RESET_COIL': '[ R ]' // Reset
+    };
+    return symbols[type] || '??';
+}
+
+// --- LÓGICA DEL MONITOR ---
+
+function updateMonitor(input) {
+    const tag = input.value.toUpperCase().trim();
+    if (!tag) return;
+
+    if (!(tag in PLC_STATE)) {
+        PLC_STATE[tag] = false;
+        refreshMonitor(); 
+    }
+}
+
+function refreshMonitor() {
+    const monitor = document.getElementById('variable-monitor');
+    for (const key in PLC_STATE) {
+        let existingItem = document.getElementById(`var-item-${key}`);
+        if (!existingItem) {
+            existingItem = document.createElement('div');
+            existingItem.id = `var-item-${key}`;
+            existingItem.className = 'var-item';
+            existingItem.innerHTML = `
+                <span>${key}</span>
+                <input type="checkbox" id="check-${key}">
+            `;
+            monitor.appendChild(existingItem);
+
+            const checkbox = existingItem.querySelector('input');
+            checkbox.addEventListener('change', (e) => {
+                PLC_STATE[key] = e.target.checked;
+                if (simulationInterval) scanCycle(); 
+            });
+        }
+        const check = document.getElementById(`check-${key}`);
+        if (check && document.activeElement !== check) {
+            check.checked = PLC_STATE[key];
+        }
+    }
+}
+
+function syncMonitorCheckboxes() {
+    for (const key in PLC_STATE) {
+        const check = document.getElementById(`check-${key}`);
+        if (check && document.activeElement !== check) {
+            check.checked = PLC_STATE[key];
+        }
+    }
+}
+
+// --- MOTOR DE ESCANEO (PLC ENGINE) ---
+/**
+ * scanCycle - Motor Lógico Principal (PLC Engine)
+ * Implementa lógica de contactos, temporizadores, Set/Reset y bobinas normales.
+ */
+function scanCycle() {
+    const rungs = document.querySelectorAll('.rung');
+    
+    // 1. Preparación del ciclo:
+    // Creamos una copia del estado actual para que los contactos lean valores estables.
+    const currentState = { ...PLC_STATE };
+    // nextState acumulará los cambios producidos por las bobinas y memorias en este scan.
+    let nextState = { ...PLC_STATE };
+    // Registro para asegurar que el RESET tenga prioridad absoluta sobre el SET en el mismo ciclo.
+    let tempResets = {}; 
+
+    // 2. Limpieza de Bobinas Normales:
+    // Las bobinas ( ) deben apagarse si no reciben flujo, a diferencia de los S/R.
+    document.querySelectorAll('.ladder-item.COIL .var-label').forEach(input => {
+        const tag = input.value.toUpperCase().trim();
+        if (tag) nextState[tag] = false; 
+    });
+
+    // 3. Procesamiento de Renglones (Rungs):
+    rungs.forEach(rung => {
+        let powerFlow = true; // El flujo inicia verdadero desde el riel izquierdo.
+        const components = rung.querySelectorAll('.ladder-item');
+
+        components.forEach(comp => {
+            const type = comp.classList[1];
+            const inputElement = comp.querySelector('.var-label');
+            if (!inputElement) return;
+            const tag = inputElement.value.toUpperCase().trim();
+            if (!tag) return;
+
+            // --- Lógica de Contactos (Leen de currentState) ---
+            if (type === 'NO') {
+                if (!currentState[tag]) powerFlow = false;
+            }
+            else if (type === 'NC') {
+                if (currentState[tag]) powerFlow = false;
+            }
+            
+            // --- Bloques Temporizadores (Lógica TON/TOF corregida) ---
+            else if (type === 'TON') {
+                const timeLimit = parseFloat(comp.querySelector('.time-val')?.value || 3);
+                if (powerFlow) {
+                    if (!comp.startTime) comp.startTime = Date.now();
+                    const elapsed = (Date.now() - comp.startTime) / 1000;
+                    comp.querySelector('.symbol').innerText = `[ ${elapsed.toFixed(1)}s ]`;
+                    // La salida solo es verdadera si se alcanzó el tiempo.
+                    const output = (elapsed >= timeLimit);
+                    powerFlow = output;
+                    nextState[tag] = output;   // Guardar en el estado
+                } else {
+                    comp.startTime = null;
+                    comp.querySelector('.symbol').innerText = '[TON]';
+                    powerFlow = false;
+                    nextState[tag] = false;    // Apagar en el estado
+                }
+            }
+            else if (type === 'TOF') {
+                const timeLimit = parseFloat(comp.querySelector('.time-val')?.value || 3);
+                if (powerFlow) {
+                    comp.startTime = null;
+                    comp.querySelector('.symbol').innerText = '[TOF]';
+                    powerFlow = true;
+                    nextState[tag] = true;     // Guardar en el estado
+                } else {
+                    if (!comp.startTime) comp.startTime = Date.now();
+                    const elapsed = (Date.now() - comp.startTime) / 1000;
+                    comp.querySelector('.symbol').innerText = `[ ${elapsed.toFixed(1)}s ]`;
+                    // Mantiene la salida hasta que se cumpla el tiempo de desconexión.
+                    const output = (elapsed < timeLimit);
+                    powerFlow = output;
+                    nextState[tag] = output;   // Guardar en el estado
+                }
+            }
+
+            // --- Bloques de Memoria (Set / Reset con Dominancia) ---
+            else if (type === 'SR') { // Instrucción SET [ S ]
+                // Solo activa si hay flujo y NO hay un reset activo en este ciclo.
+                if (powerFlow && !tempResets[tag]) {
+                    nextState[tag] = true;
+                }
+                powerFlow = nextState[tag];
+            }
+            else if (type === 'RESET_COIL') { // Instrucción RESET [ R ]
+                if (powerFlow) {
+                    nextState[tag] = false;
+                    tempResets[tag] = true; // Prioridad de reset activa.
+                }
+                powerFlow = nextState[tag];
+            }
+
+            // --- Bobina Normal ( ) con soporte para paralelos (Lógica OR) ---
+            else if (type === 'COIL') {
+                // Si hay flujo O ya fue activada por otro renglón, y no hay reset.
+                if (powerFlow && !tempResets[tag]) {
+                    nextState[tag] = true;
+                }
+            }
+
+            // 4. Actualización Visual del componente en el diagrama
+            updateVisualState(comp, (type === 'COIL' || type === 'SR' || type === 'RESET_COIL') ? nextState[tag] : powerFlow);
+        });
+    });
+
+    // 5. Finalización del Scan:
+    // Volcamos el nuevo estado calculado al PLC_STATE oficial.
+    Object.assign(PLC_STATE, nextState);
+    
+    // Sincronizamos los checkboxes del monitor flotante.
+    syncMonitorCheckboxes();
+}
+
+function updateVisualState(element, isActive) {
+    if (isActive) {
+        element.classList.add('active');
+    } else {
+        element.classList.remove('active');
+    }
+}
+
+// --- CONTROLES DE SIMULACIÓN ---
+
+document.getElementById('run-btn').addEventListener('click', () => {
+    if (checkLogicErrors()) {
+        alert("Error: Hay componentes sin etiqueta (TAG).");
+        return;
+    }
+    // Detener cualquier simulación previa para evitar múltiples intervalos
+    if (simulationInterval) {
+        clearInterval(simulationInterval);
+        simulationInterval = null;
+    }
+    simulationInterval = setInterval(scanCycle, 100);
+    document.getElementById('run-btn').style.backgroundColor = "#27ae60";
+});
+
+document.getElementById('stop-btn').addEventListener('click', () => {
+    clearInterval(simulationInterval);
+    simulationInterval = null;
+    document.getElementById('run-btn').style.backgroundColor = "";
+});
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+    clearInterval(simulationInterval);
+    simulationInterval = null;
+    document.getElementById('run-btn').style.backgroundColor = "";
+    
+    // Reiniciar todas las variables del PLC
+    for (let key in PLC_STATE) PLC_STATE[key] = false;
+    
+    // Reiniciar temporizadores (borrar tiempos acumulados y textos)
+    document.querySelectorAll('.ladder-item.TON, .ladder-item.TOF').forEach(comp => {
+        comp.startTime = null;
+        const symbol = comp.querySelector('.symbol');
+        if (comp.classList.contains('TON')) {
+            symbol.innerText = '[TON]';
+        } else {
+            symbol.innerText = '[TOF]';
+        }
+        // Quitar clase activa si la tuvieran
+        comp.classList.remove('active');
+    });
+    
+    refreshMonitor();
+});
+
+function checkLogicErrors() {
+    return Array.from(document.querySelectorAll('.var-label')).some(i => i.value.trim() === "");
+}
+
+// --- EVENTOS DRAG & DROP ---
+
+document.addEventListener('DOMContentLoaded', () => {
+    const draggables = document.querySelectorAll('.draggable');
+    draggables.forEach(draggable => {
+        draggable.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('type', e.target.getAttribute('data-type'));
+            e.target.style.opacity = "0.5";
+        });
+        draggable.addEventListener('dragend', (e) => e.target.style.opacity = "1");
+    });
+
+    canvas.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        canvas.style.backgroundColor = "#f0f8ff";
+    });
+
+    canvas.addEventListener('dragleave', () => canvas.style.backgroundColor = "");
+
+    canvas.addEventListener('drop', (e) => {
+        e.preventDefault();
+        canvas.style.backgroundColor = "";
+        addComponentToCanvas(e.dataTransfer.getData('type'));
+    });
+});
+
+// --- SISTEMA DE PERSISTENCIA (EXPORTAR / IMPORTAR) ---
+
+// Función para Exportar el proyecto
+// --- SISTEMA DE EXPORTACIÓN ROBUSTO (Uso de Blobs) ---
+document.getElementById('btn-exp').addEventListener('click', () => {
+    const rungsData = [];
+    const rungs = document.querySelectorAll('.rung');
+
+    if (rungs.length === 0) {
+        alert("El diagrama está vacío. No hay nada que exportar.");
+        return;
+    }
+
+    rungs.forEach(rung => {
+        const components = [];
+        // Seleccionamos solo los elementos dentro del área de contenido del rung
+        rung.querySelectorAll('.ladder-item').forEach(comp => {
+            components.push({
+                type: comp.classList[1], // El tipo (NO, NC, COIL, SR, etc)
+                tag: comp.querySelector('.var-label').value,
+                time: comp.querySelector('.time-val')?.value || null
+            });
+        });
+        rungsData.push(components);
+    });
+
+    // Convertimos el objeto a una cadena JSON
+    const jsonString = JSON.stringify(rungsData, null, 2);
+    
+    // Creamos un Blob (Binary Large Object) para manejar los datos
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    
+    // Creamos una URL temporal para el archivo
+    const url = URL.createObjectURL(blob);
+    
+    // Creamos el enlace de descarga
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = "proyecto_plc_lardet.json";
+    
+    // Forzamos la descarga y limpiamos la memoria
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    console.log("Proyecto exportado exitosamente como Blob.");
+});
+
+// Función para Importar el proyecto
+function importarProyecto(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const rungsData = JSON.parse(e.target.result);
+            
+            // Limpiar canvas actual
+            canvas.innerHTML = '';
+            rungCount = 0;
+            selectedRungContent = null;
+
+            // Reconstruir Rungs y Componentes
+            rungsData.forEach(rungItems => {
+                const contentArea = createRung();
+                rungItems.forEach(item => {
+                    // Usamos la lógica de creación existente
+                    addComponentToCanvas(item.type);
+                    
+                    // Asignar los valores guardados al último elemento creado
+                    const lastComp = contentArea.lastChild;
+                    if (lastComp) {
+                        const labelInput = lastComp.querySelector('.var-label');
+                        if (labelInput) {
+                            labelInput.value = item.tag;
+                            updateMonitor(labelInput); // Registrar en PLC_STATE
+                        }
+                        const timeInput = lastComp.querySelector('.time-val');
+                        if (timeInput && item.time) {
+                            timeInput.value = item.time;
+                        }
+                    }
+                });
+            });
+            console.log("Proyecto importado con éxito.");
+        } catch (err) {
+            alert("Error al leer el archivo JSON: " + err.message);
+        }
+    };
+    reader.readAsText(file);
+}
+
+function toggleMonitor() {
+    const container = document.getElementById('side-monitor');
+    container.classList.toggle('collapsed');
+    
+    // Opcional: Cambiar el texto del botón según el estado
+    const btn = document.getElementById('toggle-monitor');
+    if (container.classList.contains('collapsed')) {
+        btn.innerText = "▲ Mostrar Monitor";
+    } else {
+        btn.innerText = "▼ Contraer Monitor";
+    }
+}
+
+// Asegúrate de que al iniciar, el monitor esté disponible
+document.addEventListener('DOMContentLoaded', () => {
+    // ... resto de tus inits ...
+    refreshMonitor(); 
+});</script>
 </body>
 
 </html>
